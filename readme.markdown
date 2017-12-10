@@ -1,5 +1,5 @@
 # condavision
-## Automatic Environment ProVisioning with Conda
+## Automatic Python Environment ProVisioning with Conda
 
 [Conda](https://conda.io/docs/index.html) is an environment manager similar to virtualenv, but it features automatic dependency resolution that has made it a joy for me to use. To get a python environment set up with conda, its only a matter of running something like:
 ```sh
