@@ -1,8 +1,24 @@
 #!/bin/bash
-# TODO: if run without argument, make self executable, 
-#       add self to environment, so python executables can be run with condavision
-pythonversion=$1 
-pythonscript=$2
+if [ $# -eq 0 ]
+then 
+    if which condavision
+    then
+        echo "no arguments. condavision is already on your path, exiting"
+        exit
+    else
+        echo "adding condavision to path"
+        ln condavision.annotated.sh /usr/local/bin/condavision
+        exit
+    fi
+fi
+if [ -z $2 ] # check if I have a second argument
+then
+    pythonversion="python=3.6" # if there's only one argument default to python 3.6 
+    pythonscript=$1     # and use first argument as python script
+else
+    pythonversion=$1    # else if there's 2 arguments, use the first as python version
+    pythonscript=$2     # and second as path of python script
+fi
 # append pythonscript argument to to list of all python files in PYTHONPATH
 if [ $PYTHONPATH ]
 then
@@ -10,7 +26,6 @@ then
 else
     pypathfiles=$pythonscript
 fi
-echo $pypathfiles
 # also get the names of the python files in python path and consider them possible modules that conda shouldn't try to isntall on its own
 localmod=$(cut -f 1 -d '.' <(grep .py <(ls -R1 $PYTHONPATH)))
 # plus a sorted string containing all the built in modules for python 2.7, 3.5 and 3.6, sure there's python functions that can print these out, but the whole point is I don't know what version of python I have installed, and besides I don't want to wait around for python to launch and import stuff when I can just embed a big string in this file
@@ -44,6 +59,7 @@ done
 condamods=$(comm -13 <( echo -e "$nonconda" ) <( echo $dependencies | tr " " "\n" | sort -u))
 # create a unique string from python version and the modules to be installed in this environment
 condahash=$(echo $pythonversion$condamods | openssl md5)
+echo $pythonversion
 echo $condamods
 # print a list of existing environments and see if one hash the same hash
 # that means an environment was created for the same set of module dependencies
@@ -56,4 +72,5 @@ else
     # say yes automatically
     yes | conda create --name $condahash $pythonversion $(echo $condamods)
 fi
+echo -e "environment ready, running $pythonscript\n"
 source activate $condahash && python $pythonscript
