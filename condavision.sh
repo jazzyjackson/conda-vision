@@ -25,11 +25,16 @@ else
     pythonscript=$2     # and second as path of python script
     pyargs=$3    
 fi
+echo $pythonversion
+echo $pythonscript
+echo $pyargs
 if [ $PYTHONPATH ]
 then
     pypathfiles=$(echo -e "$pythonscript\n$(find -f $PYTHONPATH | grep ".py$")")
+    localmod=$(cut -f 1 -d '.' <(grep .py <(ls -R1 $PYTHONPATH)))    
 else
     pypathfiles=$pythonscript
+    localmod=""
 fi
 # also get the names of the python files in python path and consider them possible modules that conda shouldn't try to isntall on its own
 localmod=$(cut -f 1 -d '.' <(grep .py <(ls -R1 $PYTHONPATH)))
