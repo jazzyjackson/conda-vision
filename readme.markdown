@@ -44,3 +44,26 @@ It also checks your PYTHONPATH and installs dependencies for any of your own mod
 
 condavision prints out the progress of condavision and some of my own messages. If you want it to run silently you'll have to comment out some echoes and redirect some processes to /dev/null - actually if someone wants to add a --silent flag feature that'd be great.
 
+## Usage as SecureConda
+condavision also provides the unique ability to allow users without permission to read a python script the ability to execute the python script.
+
+Typically if you want to run a python script such as
+```py
+#!/usr/bin/env python
+print("I'm a secret!")
+```
+Python runs with the uid of the current user, so if the current user has no read permission, the python executable can't read the source code either. Instead, you can make a rule allowing a certain group to execute the script, and execute condavision as root without a password.
+
+Presumably, as the owner of a system, you could design python scripts that you trust to run as root. It's not ideal, there may be a way for condavision to read the script as root and execute it as the user running condavision. (Perhaps it could copy the contents as root to a tmp directory that the user is allowed to read, but never gets the chance to because it is given a random filename in a hidden directory or something like that, but in the meantime, I'll just allow trusted scripts to run as root. This has the nice side effect of allowing python scripts to use credentials that are locked down so they can only be read by root.)
+
+```sh
+if [[ uname == Darwin ]]
+then
+    # append to sudoers.d on mac osx
+    echo "%admin ALL=(ALL) NOPASSWD: /usr/local/bin/condavision" | sudo tee -a  /private/etc/sudoers.d/secureConda
+else
+    # append to sudoers.d on linux
+    echo "%sudo ALL=(ALL) NOPASSWD: /usr/local/bin/condavision" | sudo tee -a  /etc/sudoers.d/secureConda
+fi
+```
+Instead of admin or sudo you can decide what group is allowed to execute condavision. You can then chmod programs as 110 and only members of the group that owns that source code and execute it, and the magic number only has to read condavision before it gets elevated permission to actually read the rest of the source code.
