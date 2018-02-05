@@ -1,16 +1,11 @@
-#!/bin/bash
-ttycho(){
-    # override echo to only print out if being run in a terminal, not when output is piped
-    [[ -t 1 ]] && echo $1
-}
 if [ $# -eq 0 ]
 then 
     if which condavision
     then
-        ttycho "no arguments. condavision is already on your path, exiting"
+        echo "no arguments. condavision is already on your path, exiting"
         exit
     else
-        ttycho "adding condavision to path"
+        echo "adding condavision to path"
         ln condavision.sh /usr/local/bin/condavision
         exit
     fi
@@ -25,9 +20,9 @@ else
     pythonscript=$2     # and second as path of python script
     pyargs=$3
 fi
-echo $pythonversion
-echo $pythonscript
-echo $pyargs
+echo "version: " $pythonversion
+echo "script: " $pythonscript
+echo "args: " $pyargs
 if [ $PYTHONPATH ]
 then
     # also get the names of the python files in python path and consider them possible modules that conda shouldn't try to isntall on its own
@@ -74,8 +69,8 @@ done
 condamods=$(comm -13 <( echo -e "$nonconda" ) <( echo $dependencies | tr " " "\n" | sort -u))
 # create a unique string from python version and the modules to be installed in this environment
 condahash=$(echo $pythonversion$condamods | openssl md5 | tr -cd [:alnum:] ) #alnum to throw out parens, spaces, things that would break the filename if openssl spits out extraneous characters like (stdin:)
-ttycho $pythonversion
-ttycho $condamods
+echo $pythonversion
+echo $condamods
 # print a list of existing environments and see if one hash the same hash
 # that means an environment was created for the same set of module dependencies
 # using conda evn list is the more robust, sure proof way, but it takes like a whole second
@@ -83,10 +78,10 @@ ttycho $condamods
 # and have your answer instantaneously
 if [[ $(conda env list | grep $condahash) ]]
 then
-    ttycho "environment exists"
+    echo "environment exists"
 else
-    ttycho "creating environment"
+    echo "creating environment"
     conda create --yes --name $condahash --quiet $pythonversion $(echo $condamods)
 fi
-ttycho -e "environment ready, running $pythonscript\n"
+echo -e "environment ready, running $pythonscript\n"
 source activate $condahash && python $pythonscript $pyargs
