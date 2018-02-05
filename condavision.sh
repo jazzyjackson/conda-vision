@@ -11,7 +11,7 @@ then
     fi
 fi
 # set python version, grab name of script, and slice arguments
-if [[ $1 =~ '^python=[0-9.]+$']]
+if [[ $1 =~ '^python=[0-9.]+$' ]]
 then
     pythonversion=$1    # else if there's 2 arguments, use the first as python version
     pythonscript=$2     # and second as path of python script
