@@ -10,20 +10,22 @@ then
         exit
     fi
 fi
-if [ -z $2 ] # check if I have a second argument
-then    # if no second argument, check extension of filename, R?
-    pythonversion="python=3.6" # if there's only one argument default to python 3.6 
-    pythonscript=$1     # and use first argument as python script
-    pyargs=$2
-else
+# set python version, grab name of script, and slice arguments
+if [[ $1 =~ '^python=[0-9.]+$']]
+then
     pythonversion=$1    # else if there's 2 arguments, use the first as python version
     pythonscript=$2     # and second as path of python script
-    pyargs=$3
+    pyargs="${@:3}"     # any remaining arguments will be passed to python
+else
+    pythonversion="python=3.6" # if there's only one argument default to python 3.6 
+    pythonscript=$1            # and use first argument as python script
+    pyargs=$"${@:2}"           # any remaining arguments will be passed to python
 fi
+
 echo "version: " $pythonversion
 echo "script: " $pythonscript
 echo "args: " $pyargs
-if [ $PYTHONPATH ]
+if [ $PYTHONPATH ] # if PYTHONPATH variable is set, include python files therein in a list of modules not to add via conda (they're already here!)
 then
     # also get the names of the python files in python path and consider them possible modules that conda shouldn't try to isntall on its own
     pypathfiles=$(echo -e "$pythonscript\n$(find -f $PYTHONPATH | grep ".py$")")
