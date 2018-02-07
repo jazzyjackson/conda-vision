@@ -27,8 +27,8 @@ echo "args:" $pyargs
 if [ $PYTHONPATH ] # if PYTHONPATH variable is set, include python files therein in a list of modules not to add via conda (they're already here!)
 then
     # also get the names of the python files in python path and consider them possible modules that conda shouldn't try to isntall on its own
-    pypathfiles=$(echo -e "$pythonscript\n$(find -f $PYTHONPATH | grep ".py$")")
-    localmod=$(cut -f 1 -d '.' <(grep .py <(ls -R1 $PYTHONPATH)))    
+    pypathfiles=$(echo -e "$pythonscript\n$(find $PYTHONPATH -name '*.py')")
+    localmod=$(cut -f 1 -d '.' <(grep .py <(ls -R1 $PYTHONPATH)))
 else
     # if PYTHONPATH isnt set consider list of local modules blank
     pypathfiles=$pythonscript
