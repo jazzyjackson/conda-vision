@@ -1,12 +1,16 @@
 #!/bin/bash
+ttycho(){
+    # override echo to only print out if being run in a terminal, not when output is piped
+    [[ -t 1 ]] && echo $1
+}
 if [ $# -eq 0 ]
 then 
     if which condavision
     then
-        echo "no arguments. condavision is already on your path, exiting"
+        ttycho "no arguments. condavision is already on your path, exiting"
         exit
     else
-        echo "adding condavision to path"
+        ttycho "adding condavision to path"
         # you could link a different script to condavision to change default behavior. if you want 36
         ln condavision27.sh /usr/bin/condavision
         ln condavision36.sh /usr/bin/condavision3
@@ -20,15 +24,15 @@ pythonversion="python=2.7" # if there's only one argument default to python 3.6
 pythonscript=$1            # and use first argument as python script
 pyargs=$"${@:2}"           # any remaining arguments will be passed to python
 
-echo "version:" $pythonversion
-echo "script:" $pythonscript
-echo "args:" $pyargs
+ttycho "version:"$pythonversion
+ttycho "script:"$pythonscript
+ttycho "args:"$pyargs
 
 if [ $PYTHONPATH ] # if PYTHONPATH variable is set, include python files therein in a list of modules not to add via conda (they're already here!)
 then
     # also get the names of the python files in python path and consider them possible modules that conda shouldn't try to isntall on its own
     pypathfiles=$(echo -e "$pythonscript\n$(find $PYTHONPATH -name '*.py')")
-    localmod=$(cut -f 1 -d '.' <(grep .py <(ls -R1 $PYTHONPATH)))   
+    localmod=$(cut -f 1 -d '.' <(grep .py <(ls -R1 $PYTHONPATH)))
 else
     # if PYTHONPATH isnt set consider list of local modules blank
     pypathfiles=$pythonscript
@@ -70,8 +74,8 @@ done
 condamods=$(comm -13 <( echo -e "$nonconda" ) <( echo $dependencies | tr " " "\n" | sort -u))
 # create a unique string from python version and the modules to be installed in this environment
 condahash=$(echo $pythonversion$condamods | openssl md5 | tr -cd [:alnum:] ) #alnum to throw out parens, spaces, things that would break the filename if openssl spits out extraneous characters like (stdin:)
-echo $pythonversion
-echo $condamods
+ttycho $pythonversion
+ttycho $condamods
 # print a list of existing environments and see if one hash the same hash
 # that means an environment was created for the same set of module dependencies
 # using conda evn list is the more robust, sure proof way, but it takes like a whole second
@@ -79,10 +83,15 @@ echo $condamods
 # and have your answer instantaneously
 if [[ $(conda env list | grep $condahash) ]]
 then
-    echo "environment exists"
+    ttycho "environment exists"
 else
-    echo "creating environment"
-    conda create --yes --name $condahash --quiet $pythonversion $(echo $condamods)
+    ttycho "creating environment"
+    if [[ -t 1 ]] # if we're in a tty, print progress, if we're a child_process without a shell, print progress to /dev/null
+    then
+        conda create --yes --name $condahash --quiet $pythonversion $(echo $condamods)
+    else
+        conda create --yes --name $condahash --quiet $pythonversion $(echo $condamods) | /dev/null
+    fi
 fi
-echo -e "environment ready, running $pythonscript\n"
+ttycho -e "environment ready, running $pythonscript\n"
 source activate $condahash && python $pythonscript $pyargs
