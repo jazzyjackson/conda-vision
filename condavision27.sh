@@ -52,6 +52,7 @@ regexfive='^require\("?([a-zA-Z0-9, ]+)"?\)'
 
 for file in $pypathfiles
 do
+    ttycho $file
     while read line
     do
         if [[ $line =~ $regexone || $line =~ $regextwo || $line =~ $regexthree ]]
@@ -90,7 +91,7 @@ else
     then
         conda create --yes --name $condahash --quiet $pythonversion $(echo $condamods)
     else
-        conda create --yes --name $condahash --quiet $pythonversion $(echo $condamods) | /dev/null
+        conda create --yes --name $condahash --quiet $pythonversion $(echo $condamods) >> /logs/conda.log
     fi
 fi
 ttycho -e "environment ready, running $pythonscript\n"
