@@ -12,8 +12,11 @@ then
     else
         ttycho "adding condavision to path"
         # you could link a different script to condavision to change default behavior. if you want 36
-        ln condavision27.sh /usr/bin/condavision
-        ln condavision36.sh /usr/bin/condavision3
+        ln condavision.sh /usr/bin/condavision
+        ln condavision.sh "/usr/bin/condavision python=2.7"
+        ln condavision.sh "/usr/bin/condavision python=3.4"
+        ln condavision.sh "/usr/bin/condavision python=3.5"
+        ln condavision.sh "/usr/bin/condavision python=3.6"
         exit
     fi
 fi
