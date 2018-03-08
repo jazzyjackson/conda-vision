@@ -70,6 +70,7 @@ do
 done
 # if exeversion is R, append R to all the dependencies
 # sed "s/^/r-" | tr \n ' '
+ttycho $dependencies
 
 # <( echo -e "$nonconda" ) is first 'file'
 # <( echo $dependencies | tr " " "\n" | sort -u) dependencies translated into lines and sorted for unique values is second 'file'
